@@ -34,7 +34,10 @@ echo "Configuration du dépôt Git..."
 
 # Extraire l'URL avec les credentials
 # Format: https://username:token@host/path/repo.git
-REPO_URL_WITH_CREDENTIALS=$(echo "$GIT_HTTP_REPO_URL" | sed "s|https://|https://${GIT_API_LOGIN}:${GIT_API_TOKEN}@|")
+# Pour GitHub, on peut utiliser juste le token ou username:token
+# Extraire le nom d'utilisateur de l'email si nécessaire
+GIT_USERNAME=$(echo "$GIT_API_LOGIN" | cut -d'@' -f1)
+REPO_URL_WITH_CREDENTIALS=$(echo "$GIT_HTTP_REPO_URL" | sed "s|https://|https://${GIT_USERNAME}:${GIT_API_TOKEN}@|")
 
 # Configurer le remote origin s'il n'existe pas, sinon le mettre à jour
 if git remote get-url origin &>/dev/null; then
