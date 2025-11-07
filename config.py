@@ -3,9 +3,36 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Charger les variables d'environnement depuis .env
-env_path = Path(__file__).parent / '.env'
-load_dotenv(dotenv_path=env_path)
+def _should_load_dotenv():
+    """
+    Détermine si le fichier .env doit être chargé.
+    
+    Le .env n'est chargé que si :
+    - On n'est pas dans un environnement CI
+    - Les variables d'environnement requises ne sont pas déjà définies
+    """
+    # Vérifier si on est dans un environnement CI
+    is_ci = os.getenv('CI') == 'true' or os.getenv('GITHUB_ACTIONS') == 'true'
+    
+    if is_ci:
+        return False
+    
+    # Vérifier si les variables requises sont déjà définies
+    required_vars = ['NETATMO_CLIENT_ID', 'NETATMO_CLIENT_SECRET']
+    has_required_vars = all(os.getenv(var) for var in required_vars)
+    
+    # Si les variables sont déjà définies, pas besoin de charger .env
+    if has_required_vars:
+        return False
+    
+    # Sinon, on peut charger le .env
+    return True
+
+# Charger les variables d'environnement depuis .env si nécessaire
+if _should_load_dotenv():
+    env_path = Path(__file__).parent / '.env'
+    if env_path.exists():
+        load_dotenv(dotenv_path=env_path, override=False)
 
 
 class Config:
