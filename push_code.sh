@@ -53,7 +53,8 @@ echo "Remote configuré: $(echo $GIT_HTTP_REPO_URL | sed 's|https://|https://***
 
 # Ajouter tous les fichiers (sauf ceux dans .gitignore)
 echo "Ajout des fichiers..."
-git add .
+# Exclure explicitement .env.gitcredentials pour éviter de commiter les secrets
+git add . -- ':!.env.gitcredentials'
 
 # Vérifier s'il y a des changements à committer
 if git diff --staged --quiet; then

@@ -1,4 +1,5 @@
 .env
+.env.gitcredentials
 __pycache__/
 *.pyc
 *.pyo
