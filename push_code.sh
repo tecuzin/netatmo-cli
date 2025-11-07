@@ -54,16 +54,16 @@ echo "Remote configuré: $(echo $GIT_HTTP_REPO_URL | sed 's|https://|https://***
 # Ajouter tous les fichiers (sauf ceux dans .gitignore)
 echo "Ajout des fichiers..."
 # Exclure explicitement .env.gitcredentials pour éviter de commiter les secrets
-git add . -- ':!.env.gitcredentials'
+git add . -- ':!.env.gitcredentials' 2>/dev/null || true
 
 # Vérifier s'il y a des changements à committer
-if git diff --staged --quiet; then
-    echo "Aucun changement à committer"
-else
+if ! git diff --staged --quiet; then
     # Créer un commit avec un message par défaut ou utiliser celui fourni
     COMMIT_MESSAGE="${1:-Update code}"
     echo "Création du commit: $COMMIT_MESSAGE"
     git commit -m "$COMMIT_MESSAGE"
+else
+    echo "Aucun changement à committer"
 fi
 
 # Push vers le dépôt
@@ -72,12 +72,10 @@ BRANCH=$(git branch --show-current)
 echo "Branche actuelle: $BRANCH"
 
 # Push avec configuration des credentials
-git push -u origin "$BRANCH" || {
-    echo "Erreur lors du push. Tentative avec force..."
-    # Si le push échoue, essayer de récupérer d'abord
-    git fetch origin
-    git push -u origin "$BRANCH"
-}
+if ! git push -u origin "$BRANCH"; then
+    echo "Erreur lors du push. Tentative avec force push (nécessaire après nettoyage de l'historique)..."
+    git push -u origin "$BRANCH" --force
+fi
 
 echo "Push réussi!"
 
